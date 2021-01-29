@@ -5,12 +5,12 @@
     "id": {
       "group": null,
       "name": "TA-ipqualityscore",
-      "version": "1.0.18"
+      "version": "1.0.1"
     },
     "author": [
       {
         "name": "Varun Sondhi",
-        "email": "sondhi.varun@outlook.com",
+        "email": "prosolv@outlook.com",
         "company": "PROSOLV"
       }
     ],

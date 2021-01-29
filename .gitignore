@@ -1,5 +1,9 @@
 #.gitignore
 
+# python virtual environment files
+*/venv/*
+venv
+
 # local configuration files
 */local/*
 
@@ -17,9 +21,7 @@
 .idea
 
 # Read the doc & Sphinx
-docs/_build
-docs/_static
-docs/_templates
+docs/build
 
 # backups local
 backups
@@ -35,3 +37,6 @@ backups
 
 # appinspect reports
 appinspect_report*.html
+
+# build files
+*tgz

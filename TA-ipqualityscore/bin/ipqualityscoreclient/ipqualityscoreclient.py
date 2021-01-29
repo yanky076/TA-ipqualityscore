@@ -1,3 +1,5 @@
+# encoding = utf-8
+
 import requests
 from .app.proxy_vpn_detection_wrapper import ProxyVPNDetectionWrapper
 

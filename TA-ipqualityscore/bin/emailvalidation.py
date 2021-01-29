@@ -1,3 +1,5 @@
+# encoding = utf-8
+
 import sys, os
 import logging, logging.handlers
 import splunk
