@@ -50,7 +50,7 @@ def get_credentials(sessionKey):
 @Configuration()
 class URLCheckerCommand(StreamingCommand):
 
-    strictness = Option(require=False, default=True,
+    strictness = Option(require=False, default=0,
                         validate=validators.Integer())
 
     def stream(self, records):

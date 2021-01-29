@@ -28,9 +28,3 @@ class IPQualityScoreClient(object):
 
     def url_checker(self, url, strictness=0):
         return self.proxy_vpn_detection_object.url_checker(url, strictness)
-
-
-if __name__ == "__main__":
-    ipqualityscore_client = IPQualityScoreClient(
-        "DLI5aJIBw29HiylQYxN8vJuDZjRCtfkf")
-    ipqualityscore_client.url_checker("https://www.google.com")
