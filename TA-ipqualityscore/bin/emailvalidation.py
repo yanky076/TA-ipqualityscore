@@ -31,7 +31,7 @@ def setup_logging():
 
 
 def get_credentials(sessionKey):
-    myapp = 'ipqualityscore-app'
+    myapp = 'ipqualityscore_realm'
     try:
         # list all credentials
         entities = entity.getEntities(['admin', 'passwords'], namespace=myapp,
