@@ -34,6 +34,14 @@ Deployment and configuration:
    deployment
    configuration
 
+Functions and Features
+======================
+
+.. toctree::
+   :maxdepth: 2
+
+   customcommands
+
 Versions and build history:
 ===========================
 
