@@ -3,4 +3,4 @@
 
 Documentation is hosted online at:
 
-https://TA-ipqualityscore.readthedocs.io
+https://ta-ipqualityscore.readthedocs.io/

@@ -35,12 +35,17 @@ define(["react", "splunkjs/splunk"], function(react, splunk_js_sdk){
     }
 
     render() {
+      var link = e("a", {href: "https://www.ipqualityscore.com/create-account/splunk", target:"_blank"}, "free IPQS account");
       return e("div", null, [
         e("h2", null, "IPQualityScore Addon for Splunk Setup Page"),
+        e("span", null, "Please enter your IPQS API Key to connect your account. Need an API Key? Please create a ",
+            link,
+            " to get started."),
+        e("h2", null, ""),
         e("div", null, [
           e("form", { onSubmit: this.handleSubmit }, [
             e("label", null, [
-              "Token",
+              "IPQS API Key",
               e("input", { type: "text", name: "token", value: this.state.token, onChange: this.handleChange })
             ]),
             e("input", { type: "submit", value: "Submit" })
