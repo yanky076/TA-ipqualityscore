@@ -8,6 +8,7 @@ import splunk
 from splunklib.searchcommands import dispatch, StreamingCommand, Configuration, Option, validators
 import splunk.entity as entity
 from ipqualityscoreclient.ipqualityscoreclient import IPQualityScoreClient
+import json
 
 
 def setup_logging():
@@ -47,7 +48,7 @@ def get_credentials(sessionKey):
     raise Exception("No credentials have been found")
 
 
-@Configuration()
+@Configuration(distributed=True, local=False)
 class IPDetectionCommand(StreamingCommand):
 
     allow_public_access_points = Option(
@@ -69,14 +70,41 @@ class IPDetectionCommand(StreamingCommand):
             ipqualityscoreclient = IPQualityScoreClient(
                 usercreds.get('password'))
 
+            # for record in records:
+            #     # calling detection API
+            #     detection_result = ipqualityscoreclient.ip_detection(record['ip'],
+            #                                                          allow_public_access_points=self.allow_public_access_points,
+            #                                                          mobile=self.mobile,
+            #                                                          fast=self.fast,
+            #                                                          strictness=self.strictness,
+            #                                                          lighter_penalties=self.lighter_penalties)
+            #     if detection_result is not None:
+            #         for key, val in detection_result.items():
+            #             new_key = ipqualityscoreclient.get_prefix() + "_" + key
+            #             record[new_key] = val
+            #         record[ipqualityscoreclient.get_prefix(
+            #         ) + "_status"] = 'api call success'
+            #     else:
+            #         record[ipqualityscoreclient.get_prefix(
+            #         ) + "_status"] = 'api call failed'
+
+            #     yield record
+
+            ips = []
+            rs = []
             for record in records:
-                # calling detection API
-                detection_result = ipqualityscoreclient.ip_detection(record['ip'],
-                                                                     allow_public_access_points=self.allow_public_access_points,
-                                                                     mobile=self.mobile,
-                                                                     fast=self.fast,
-                                                                     strictness=self.strictness,
-                                                                     lighter_penalties=self.lighter_penalties)
+                ips.append(record.get('ip'))
+                rs.append(record)
+                
+            results_dict = ipqualityscoreclient.ip_detection_multithreaded(ips,
+                                                                               allow_public_access_points=self.allow_public_access_points,
+                                                                               mobile=self.mobile,
+                                                                               fast=self.fast,
+                                                                               strictness=self.strictness,
+                                                                               lighter_penalties=self.lighter_penalties)
+            for record in rs:
+                detection_result = results_dict.get(record['ip'])
+                logger.info(json.dumps(detection_result))
                 if detection_result is not None:
                     for key, val in detection_result.items():
                         new_key = ipqualityscoreclient.get_prefix() + "_" + key
@@ -86,7 +114,10 @@ class IPDetectionCommand(StreamingCommand):
                 else:
                     record[ipqualityscoreclient.get_prefix(
                     ) + "_status"] = 'api call failed'
-        yield record
+                    
+                yield record
+        else:
+            raise Exception("No credentials have been found")
 
 
 if __name__ == "__main__":
