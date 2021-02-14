@@ -61,33 +61,57 @@ class EmailValidationCommand(StreamingCommand):
 
     def stream(self, records):
         logger = setup_logging()
-        storage_passwords = self.service.storage_passwords
-        for credential in storage_passwords:
-            usercreds = {'username': credential.content.get(
-                'username'), 'password': credential.content.get('clear_password')}
-        if usercreds is not None:
-            ipqualityscoreclient = IPQualityScoreClient(
-                usercreds.get('password'))
 
-            for record in records:
-                # calling detection API
-                detection_result = ipqualityscoreclient.email_validation(record['email'],
-                                                                         fast=self.fast,
-                                                                         timeout=self.timeout,
-                                                                         suggest_domain=self.suggest_domain,
-                                                                         strictness=self.strictness,
-                                                                         abuse_strictness=self.abuse_strictness)
-                if detection_result is not None:
-                    for key, val in detection_result.items():
-                        new_key = ipqualityscoreclient.get_prefix() + "_" + key
-                        record[new_key] = val
-                    record[ipqualityscoreclient.get_prefix(
-                    ) + "_status"] = 'api call success'
-                else:
-                    record[ipqualityscoreclient.get_prefix(
-                    ) + "_status"] = 'api call failed'
-        yield record
+        correct_records = []
+        incorrect_records = []
+        for record in records:
+            if 'email' in record:
+                correct_records.append(record)
+            else:
+                incorrect_records.append(record)
+                
+        if len(incorrect_records) > 0:
+            self.logger.error('email field missing from '+str(len(incorrect_records))+" events. They will be ignored.")
 
+        if len(correct_records) > 0:
+            storage_passwords = self.service.storage_passwords
+            for credential in storage_passwords:
+                usercreds = {'username': credential.content.get(
+                    'username'), 'password': credential.content.get('clear_password')}
+            if usercreds is not None:
+                ipqualityscoreclient = IPQualityScoreClient(
+                    usercreds.get('password'), logger)
+
+                emails = []
+                rs = []
+                for record in correct_records:
+                    emails.append(record.get('email'))
+                    rs.append(record)
+                    
+                results_dict = ipqualityscoreclient.email_validation_multithreaded(emails,
+                                                                                    fast=self.fast,
+                                                                                    timeout=self.timeout,
+                                                                                    suggest_domain=self.suggest_domain,
+                                                                                    strictness=self.strictness,
+                                                                                    abuse_strictness=self.abuse_strictness)
+                for record in rs:
+                    detection_result = results_dict.get(record['email'])
+                    
+                    if detection_result is not None:
+                        for key, val in detection_result.items():
+                            new_key = ipqualityscoreclient.get_prefix() + "_" + key
+                            record[new_key] = val
+                        record[ipqualityscoreclient.get_prefix(
+                        ) + "_status"] = 'api call success'
+                    else:
+                        record[ipqualityscoreclient.get_prefix(
+                        ) + "_status"] = 'api call failed'
+                        
+                    yield record
+            else:
+                raise Exception("No credentials have been found")
+        else:
+            raise Exception("There are no events with email field.")
 
 if __name__ == "__main__":
     dispatch(EmailValidationCommand, sys.argv, sys.stdin, sys.stdout, __name__)

@@ -62,63 +62,57 @@ class IPDetectionCommand(StreamingCommand):
 
     def stream(self, records):
         logger = setup_logging()
-        storage_passwords = self.service.storage_passwords
-        for credential in storage_passwords:
-            usercreds = {'username': credential.content.get(
-                'username'), 'password': credential.content.get('clear_password')}
-        if usercreds is not None:
-            ipqualityscoreclient = IPQualityScoreClient(
-                usercreds.get('password'))
 
-            # for record in records:
-            #     # calling detection API
-            #     detection_result = ipqualityscoreclient.ip_detection(record['ip'],
-            #                                                          allow_public_access_points=self.allow_public_access_points,
-            #                                                          mobile=self.mobile,
-            #                                                          fast=self.fast,
-            #                                                          strictness=self.strictness,
-            #                                                          lighter_penalties=self.lighter_penalties)
-            #     if detection_result is not None:
-            #         for key, val in detection_result.items():
-            #             new_key = ipqualityscoreclient.get_prefix() + "_" + key
-            #             record[new_key] = val
-            #         record[ipqualityscoreclient.get_prefix(
-            #         ) + "_status"] = 'api call success'
-            #     else:
-            #         record[ipqualityscoreclient.get_prefix(
-            #         ) + "_status"] = 'api call failed'
-
-            #     yield record
-
-            ips = []
-            rs = []
-            for record in records:
-                ips.append(record.get('ip'))
-                rs.append(record)
+        correct_records = []
+        incorrect_records = []
+        for record in records:
+            if 'ip' in record:
+                correct_records.append(record)
+            else:
+                incorrect_records.append(record)
                 
-            results_dict = ipqualityscoreclient.ip_detection_multithreaded(ips,
-                                                                               allow_public_access_points=self.allow_public_access_points,
-                                                                               mobile=self.mobile,
-                                                                               fast=self.fast,
-                                                                               strictness=self.strictness,
-                                                                               lighter_penalties=self.lighter_penalties)
-            for record in rs:
-                detection_result = results_dict.get(record['ip'])
-                logger.info(json.dumps(detection_result))
-                if detection_result is not None:
-                    for key, val in detection_result.items():
-                        new_key = ipqualityscoreclient.get_prefix() + "_" + key
-                        record[new_key] = val
-                    record[ipqualityscoreclient.get_prefix(
-                    ) + "_status"] = 'api call success'
-                else:
-                    record[ipqualityscoreclient.get_prefix(
-                    ) + "_status"] = 'api call failed'
-                    
-                yield record
-        else:
-            raise Exception("No credentials have been found")
+        if len(incorrect_records) > 0:
+            self.logger.error('ip field missing from '+str(len(incorrect_records))+" events. They will be ignored.")
 
+        if len(correct_records) > 0:
+            storage_passwords = self.service.storage_passwords
+            for credential in storage_passwords:
+                usercreds = {'username': credential.content.get(
+                    'username'), 'password': credential.content.get('clear_password')}
+            if usercreds is not None:
+                ipqualityscoreclient = IPQualityScoreClient(
+                    usercreds.get('password'), logger)
+
+                ips = []
+                rs = []
+                for record in correct_records:
+                    ips.append(record.get('ip'))
+                    rs.append(record)
+                    
+                results_dict = ipqualityscoreclient.ip_detection_multithreaded(ips,
+                                                                                allow_public_access_points=self.allow_public_access_points,
+                                                                                mobile=self.mobile,
+                                                                                fast=self.fast,
+                                                                                strictness=self.strictness,
+                                                                                lighter_penalties=self.lighter_penalties)
+                for record in rs:
+                    detection_result = results_dict.get(record['ip'])
+                    
+                    if detection_result is not None:
+                        for key, val in detection_result.items():
+                            new_key = ipqualityscoreclient.get_prefix() + "_" + key
+                            record[new_key] = val
+                        record[ipqualityscoreclient.get_prefix(
+                        ) + "_status"] = 'api call success'
+                    else:
+                        record[ipqualityscoreclient.get_prefix(
+                        ) + "_status"] = 'api call failed'
+                        
+                    yield record
+            else:
+                raise Exception("No credentials have been found")
+        else:
+            raise Exception("There are no events with ip field.")
 
 if __name__ == "__main__":
     dispatch(IPDetectionCommand, sys.argv, sys.stdin, sys.stdout, __name__)

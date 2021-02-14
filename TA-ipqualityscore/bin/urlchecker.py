@@ -8,6 +8,7 @@ import splunk
 from splunklib.searchcommands import dispatch, StreamingCommand, Configuration, Option, validators
 import splunk.entity as entity
 from ipqualityscoreclient.ipqualityscoreclient import IPQualityScoreClient
+import splunk.Intersplunk
 
 
 def setup_logging():
@@ -55,28 +56,53 @@ class URLCheckerCommand(StreamingCommand):
 
     def stream(self, records):
         logger = setup_logging()
-        storage_passwords = self.service.storage_passwords
-        for credential in storage_passwords:
-            usercreds = {'username': credential.content.get(
-                'username'), 'password': credential.content.get('clear_password')}
-        if usercreds is not None:
-            ipqualityscoreclient = IPQualityScoreClient(
-                usercreds.get('password'))
 
-            for record in records:
-                # calling detection API
-                detection_result = ipqualityscoreclient.url_checker(record['url'], strictness=self.strictness)
-                if detection_result is not None:
-                    for key, val in detection_result.items():
-                        new_key = ipqualityscoreclient.get_prefix() + "_" + key
-                        record[new_key] = val
-                    record[ipqualityscoreclient.get_prefix(
-                    ) + "_status"] = 'api call success'
-                else:
-                    record[ipqualityscoreclient.get_prefix(
-                    ) + "_status"] = 'api call failed'
-        yield record
+        correct_records = []
+        incorrect_records = []
+        for record in records:
+            if 'url' in record:
+                correct_records.append(record)
+            else:
+                incorrect_records.append(record)
+                
+        if len(incorrect_records) > 0:
+            self.logger.error('url field missing from '+str(len(incorrect_records))+" events. They will be ignored.")
 
+        if len(correct_records) > 0:
+            storage_passwords = self.service.storage_passwords
+            for credential in storage_passwords:
+                usercreds = {'username': credential.content.get(
+                    'username'), 'password': credential.content.get('clear_password')}
+            if usercreds is not None:
+                ipqualityscoreclient = IPQualityScoreClient(
+                    usercreds.get('password'), logger)
+
+                links = []
+                rs = []
+                for record in correct_records:
+                    links.append(record.get('url'))
+                    rs.append(record)
+                    
+                results_dict = ipqualityscoreclient.url_checker_multithreaded(links, strictness=self.strictness)
+
+                for record in rs:
+                    detection_result = results_dict.get(record['url'])
+                    
+                    if detection_result is not None:
+                        for key, val in detection_result.items():
+                            new_key = ipqualityscoreclient.get_prefix() + "_" + key
+                            record[new_key] = val
+                        record[ipqualityscoreclient.get_prefix(
+                        ) + "_status"] = 'api call success'
+                    else:
+                        record[ipqualityscoreclient.get_prefix(
+                        ) + "_status"] = 'api call failed'
+                        
+                    yield record
+            else:
+                raise Exception("No credentials have been found")
+        else:
+            raise Exception("There are no events with url field.")
 
 if __name__ == "__main__":
     dispatch(URLCheckerCommand, sys.argv, sys.stdin, sys.stdout, __name__)
