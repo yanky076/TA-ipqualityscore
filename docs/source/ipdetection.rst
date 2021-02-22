@@ -145,9 +145,9 @@ Optional arguments
 Example Usage
 -------------
 
-|   ... | ipdetection field="email_address"
+|   ... | ipdetection field="src_ip"
 
-|   ... | ipdetection field="email_address" strictness=2 fast=true
+|   ... | ipdetection field="src_ip" strictness=2 fast=true
 
 .. image:: img/screenshot_ipdetection.png
     :alt: IP Detection command usage
