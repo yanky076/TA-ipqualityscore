@@ -48,7 +48,7 @@ class ProxyVPNDetectionWrapper(object):
                 results_dict[ip] = resp.json()
         return results_dict
 
-    def email_validation_multithreaded(self, emails, fast=False, timeout=7, suggest_domain=False, strictness=0, abuse_strictness=0):
+    def email_validation_multithreaded(self, emails, fast=True, timeout=7, suggest_domain=False, strictness=0, abuse_strictness=0):
         urls = []
         start_time = time.time()
 

@@ -9,13 +9,6 @@ This commands maps to Malicious URL Scanner API for IPQualityScore available [he
 - **Filter Email Spammer Domains** — Sift through suspicious emails with detection for domains confirmed as sending email SPAM. Further validate SPAM with real-time email threat scoring.
 - **Abusive Domains** - Block emails from disposable email services and throwaway accounts. Pair with IP reputation checks for deeper insight.
 
-Command Usage
--------------
-
-The event need to have **url** field available for this command to be appended to the search. Example usage::
-
-    ... | urlchecker
-
 Following fields will be added to the event if the API call is successful
 
 +--------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------+
@@ -58,13 +51,32 @@ Following fields will be added to the event if the API call is successful
 | errors       | Array of errors which occurred while attempting to process this request.                                                                                                | array of strings |
 +--------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------+
 
-Available options
------------------
+Syntax
+------
 
-Following options are available to **urlchecker** Splunk command
+    ... | urlchecker field=<field_name> [strictness=<int>]
+    
+Required arguments
+^^^^^^^^^^^^^^^^^^
 
-+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------+
-| Option           | Description                                                                                                                                                                                                                                                                                                                                                                    | Possible Values |
-+==================+================================================================================================================================================================================================================================================================================================================================================================================+=================+
-| strictness       | How strict should we scan this URL? Stricter checks may provide a higher false-positive rate. We recommend defaulting to level "0", the lowest strictness setting, and increasing to "1" or "2" depending on your levels of abuse.                                                                                                                                             | int (0-2)       |
-+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------+
+| **field**
+|   **Syntax**: field=<field_name>
+|   **Description**: Field name containing URL 
+
+Optional arguments
+^^^^^^^^^^^^^^^^^^
+| **strictness**
+|   **Syntax**: strictness=<int>
+|   **Description**: How strict should we scan this URL? Stricter checks may provide a higher false-positive rate. We recommend defaulting to level "0", the lowest strictness setting, and increasing to "1" or "2" depending on your levels of abuse.
+|   **Possible values**: 0-2
+|   **Default**: 0
+
+Example Usage
+-------------
+
+|   ... | urlchecker field="redirect_url"
+
+|   ... | urlchecker field="redirect_url" strictness=2
+
+.. image:: img/screenshot_urlchecker.png
+    :alt: URL Checker command usage

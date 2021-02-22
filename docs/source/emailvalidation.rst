@@ -11,13 +11,6 @@ This commands maps to Email Validation API for IPQualityScore available [here](h
 - **Hard Bounces** - Prevent hard bounces by pre-screening email addresses before messaging them.
 - **Disposable Email Services** - Easily block disposable email addresses and temporary mail services that allow fraudsters to spawn new emails at any time.
 
-Command Usage
--------------
-
-The event need to have **email** field available for this command to be appended to the search. Example usage::
-
-    ... | emailvalidation 
-
 Following fields will be added to the event if the API call is successful
 
 +---------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------+
@@ -76,21 +69,56 @@ Following fields will be added to the event if the API call is successful
 | errors              | Array of errors which occurred while attempting to process this request.                                                                                                                                                                                                                                                                                  | array of strings |
 +---------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------+
 
-Available options
------------------
+Syntax
+------
 
-Following options are available to **emailvalidation** Splunk command
+    ... | emailvalidation field=<field_name> [fast=(true|false)] [timeout=<int>] [suggest_domain=(true|false)] [strictness=<int>] [abuse_strictness=<int>]
+    
+Required arguments
+^^^^^^^^^^^^^^^^^^
 
-+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------+
-| Option           | Description                                                                                                                                                                                                                                                                                                                                                                    | Possible Values |
-+==================+================================================================================================================================================================================================================================================================================================================================================================================+=================+
-| fast             | When this parameter is enabled our API will not perform an SMTP check with the mail service provider, which greatly increases the API speed. Syntax and DNS checks are still performed on the email address as well as our disposable email detection service. This option is intended for services that require decision making in a time sensitive manner.                   | boolean         |
-+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------+
-| timeout          | Maximum number of seconds to wait for a reply from a mail service provider. If your implementation requirements do not need an immediate response, we recommend bumping this value to 20. Any results which experience a connection timeout will return the "timed_out" variable as true. Default value is 7 seconds.                                                          | integer (1-60)  |
-+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------+
-| suggest_domain   | Force analyze if the email address's domain has a typo and should be corrected to a popular mail service. By default, this test is currently only performed when the email is invalid or if the "recent abuse" status is true.                                                                                                                                                 | boolean         |
-+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------+
-| strictness       | Sets how strictly spam traps and honeypots are detected by our system, depending on how comfortable you are with identifying emails suspected of being a spam trap. 0 is the lowest level which will only return spam traps with high confidence. Strictness levels above 0 will return increasingly more strict results, with level 2 providing the greatest detection rates. | int (0-2)       |
-+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------+
-| abuse_strictness | Set the strictness level for machine learning pattern recognition of abusive email addresses with the "recent_abuse" data point. Default level of 0 provides good coverage, however if you are filtering account applications and facing advanced fraudsters then we recommend increasing this value to level 1 or 2.                                                          | int (0-2)       |
-+------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------+
+| **field**
+|   **Syntax**: field=<field_name>
+|   **Description**: Field name containing email address 
+
+Optional arguments
+^^^^^^^^^^^^^^^^^^
+| **fast**
+|   **Syntax**: fast=<boolean>
+|   **Description**: When this parameter is enabled our API will not perform an SMTP check with the mail service provider, which greatly increases the API speed. Syntax and DNS checks are still performed on the email address as well as our disposable email detection service. This option is intended for services that require decision making in a time sensitive manner.
+|   **Possible values**: (true|false)
+|   **Default**: true
+
+| **timeout**
+|   **Syntax**: timeout=<int>
+|   **Description**: Maximum number of seconds to wait for a reply from a mail service provider. If your implementation requirements do not need an immediate response, we recommend bumping this value to 20. Any results which experience a connection timeout will return the "timed_out" variable as true.
+|   **Possible values**: 1-60
+|   **Default**: 7
+
+| **suggest_domain**
+|   **Syntax**: suggest_domain=<boolean>
+|   **Description**: Force analyze if the email address's domain has a typo and should be corrected to a popular mail service. By default, this test is currently only performed when the email is invalid or if the "recent abuse" status is true.
+|   **Possible values**: (true|false)
+|   **Default**: false
+
+| **strictness**
+|   **Syntax**: strictness=<int>
+|   **Description**: Sets how strictly spam traps and honeypots are detected by our system, depending on how comfortable you are with identifying emails suspected of being a spam trap. 0 is the lowest level which will only return spam traps with high confidence. Strictness levels above 0 will return increasingly more strict results, with level 2 providing the greatest detection rates.
+|   **Possible values**: 0-3
+|   **Default**: 0
+
+| **abuse_strictness**
+|   **Syntax**: abuse_strictness=<int>
+|   **Description**: Set the strictness level for machine learning pattern recognition of abusive email addresses with the "recent_abuse" data point. Default level of 0 provides good coverage, however if you are filtering account applications and facing advanced fraudsters then we recommend increasing this value to level 1 or 2.
+|   **Possible values**: 0-2
+|   **Default**: 0
+
+Example Usage
+-------------
+
+|   ... | emailvalidation field="email_address"
+
+|   ... | emailvalidation field="email_address" strictness=2 timeout=30
+
+.. image:: img/screenshot_emailvalidation.png
+    :alt: Email Validation command usage

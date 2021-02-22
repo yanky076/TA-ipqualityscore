@@ -148,3 +148,6 @@ Example Usage
 |   ... | ipdetection field="email_address"
 
 |   ... | ipdetection field="email_address" strictness=2 fast=true
+
+.. image:: img/screenshot_ipdetection.png
+    :alt: IP Detection command usage
