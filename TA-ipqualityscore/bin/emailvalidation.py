@@ -50,6 +50,8 @@ def get_credentials(sessionKey):
 @Configuration()
 class EmailValidationCommand(StreamingCommand):
 
+    field = Option(
+        require=True, default=True, validate=validators.Fieldname())
     fast = Option(require=False, default=False, validate=validators.Boolean())
     timeout = Option(require=False, default=7, validate=validators.Integer())
     suggest_domain = Option(require=False, default=False,
@@ -65,7 +67,7 @@ class EmailValidationCommand(StreamingCommand):
         correct_records = []
         incorrect_records = []
         for record in records:
-            if 'email' in record:
+            if self.field in record:
                 correct_records.append(record)
             else:
                 incorrect_records.append(record)
@@ -85,7 +87,7 @@ class EmailValidationCommand(StreamingCommand):
                 emails = []
                 rs = []
                 for record in correct_records:
-                    emails.append(record.get('email'))
+                    emails.append(record.get(self.field))
                     rs.append(record)
                     
                 results_dict = ipqualityscoreclient.email_validation_multithreaded(emails,
@@ -95,7 +97,7 @@ class EmailValidationCommand(StreamingCommand):
                                                                                     strictness=self.strictness,
                                                                                     abuse_strictness=self.abuse_strictness)
                 for record in rs:
-                    detection_result = results_dict.get(record['email'])
+                    detection_result = results_dict.get(record[self.field])
                     
                     if detection_result is not None:
                         for key, val in detection_result.items():

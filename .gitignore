@@ -41,3 +41,6 @@ appinspect_report*.html
 
 # build files
 *tgz
+
+# test files
+test/sample*.txt

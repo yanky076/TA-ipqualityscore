@@ -13,14 +13,7 @@ This commands maps to Proxy & VPN Detection API for IPQualityScore available [he
 - **High Risk Behavior** - Analyze user behavior against millions of high risk patterns that indicate a user's intent to engage in fraudulent activity.
 - **Lead Generation & User Data Verification** - Ensure data that you are collecting is valid, accurate, and fresh.
 
-Command Usage
--------------
-
-The event need to have **ip** field available for this command to be appended to the search. Example usage::
-
-    ... | ipdetection 
-
-Following fields will be added to the event if the API call is successful
+Following fields will be added to the event if the command is executed successfully
 
 +------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------+
 | Field                        | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Possible Values  |
@@ -88,27 +81,70 @@ Following fields will be added to the event if the API call is successful
 | errors                       | Array of errors which occurred while attempting to process this request.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | array of strings |
 +------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------+
 
-Available options
------------------
+Syntax
+------
 
-Following options are available to **ipdetection** Splunk command
+    ... | ipdetection field=<field_name> [strictness=<int>] [user_agent=<string>] [user_language=<string>] [fast=(true|false)] [mobile=(true|false)] [allow_public_access_points=(true|false)] [lighter_penalties=(true|false)] [transaction_strictness=<int>]
 
-+----------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------+
-| Option                     | Description                                                                                                                                                                                                                                                                                                                                               | Possible Values                 |
-+============================+===========================================================================================================================================================================================================================================================================================================================================================+=================================+
-| strictness                 | How in depth (strict) do you want this query to be? Higher values take longer to process and may provide a higher false-positive rate. We recommend starting at "0", the lowest strictness setting, and increasing to "1" or "2" depending on your levels of fraud.                                                                                       | integer, 0 - 3                  |
-+----------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------+
-| user_agent                 | You can optionally provide us with the user agent string (browser). This allows us to run additional checks to see if the user is a bot or running an invalid browser. This allows us to evaluate the risk of the user as judged in the "fraud_score".                                                                                                    | string                          |
-+----------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------+
-| user_language              | You can optionally provide us with the user's language header. This allows us to evaluate the risk of the user as judged in the "fraud_score".                                                                                                                                                                                                            | string                          |
-+----------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------+
-| fast                       | When this parameter is enabled our API will not perform certain forensic checks that take longer to process. Enabling this feature greatly increases the API speed without much impact on accuracy. This option is intended for services that require decision making in a time sensitive manner and can be used for any strictness level.                | boolean, string (true or false) |
-+----------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------+
-| mobile                     | You can optionally specify that this lookup should be treated as a mobile device. Recommended for mobile lookups that do not have a user agent attached to the request. NOTE: This can cause unexpected and abnormal results if the device is not a mobile device.                                                                                        | boolean, string (true or false) |
-+----------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------+
-| allow_public_access_points | Bypasses certain checks for IP addresses from education and research institutions, schools, and some corporate connections to better accommodate audiences that frequently use public connections.                                                                                                                                                        | boolean, string (true or false) |
-+----------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------+
-| lighter_penalties          | Is your scoring too strict? Enable this setting to lower detection rates and Fraud Scores for mixed quality IP addresses. If you experience any false-positives with your traffic then enabling this feature will provide better results.                                                                                                                 | boolean, string (true or false) |
-+----------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------+
-| transaction_strictness     | Adjusts the weights for penalties applied due to irregularities and fraudulent patterns detected on order and transaction details that can be optionally provided on each API request. This feature is only beneficial if you are passing order and transaction details. A table is available further down the page with supported transaction variables. | integer, 0 - 2                  |
-+----------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------+
+Required arguments
+^^^^^^^^^^^^^^^^^^
+
+| **field**
+|   **Syntax**: field=<field_name>
+|   **Description**: Field name containing IPv4 address 
+
+Optional arguments
+^^^^^^^^^^^^^^^^^^
+
+| **strictness**
+|   **Syntax**: strictness=<int>
+|   **Description**: How in depth (strict) do you want this query to be? Higher values take longer to process and may provide a higher false-positive rate. We recommend starting at “0”, the lowest strictness setting, and increasing to “1” or “2” depending on your levels of fraud.
+|   **Possible values**: 0-3
+|   **Default**: 0
+
+| **user_agent**
+|   **Syntax**: user_agent=<string>
+|   **Description**: You can optionally provide us with the user agent string (browser). This allows us to run additional checks to see if the user is a bot or running an invalid browser. This allows us to evaluate the risk of the user as judged in the "fraud_score".
+|   **Default**: null
+
+| **user_language**
+|   **Syntax**: user_language=<string>
+|   **Description**: You can optionally provide us with the user's language header. This allows us to evaluate the risk of the user as judged in the "fraud_score".
+|   **Default**: null
+
+| **fast**
+|   **Syntax**: fast=<boolean>
+|   **Description**: When this parameter is enabled our API will not perform certain forensic checks that take longer to process. Enabling this feature greatly increases the API speed without much impact on accuracy. This option is intended for services that require decision making in a time sensitive manner and can be used for any strictness level.
+|   **Possible values**: (true|false)
+|   **Default**: true
+
+| **mobile**
+|   **Syntax**: mobile=<boolean>
+|   **Description**: You can optionally specify that this lookup should be treated as a mobile device. Recommended for mobile lookups that do not have a user agent attached to the request. NOTE: This can cause unexpected and abnormal results if the device is not a mobile device.
+|   **Possible values**: (true|false)
+|   **Default**: false
+
+| **allow_public_access_points**
+|   **Syntax**: allow_public_access_points=<boolean>
+|   **Description**: Bypasses certain checks for IP addresses from education and research institutions, schools, and some corporate connections to better accommodate audiences that frequently use public connections.
+|   **Possible values**: (true|false)
+|   **Default**: true
+
+| **lighter_penalties**
+|   **Syntax**: lighter_penalties=<boolean>
+|   **Description**: Is your scoring too strict? Enable this setting to lower detection rates and Fraud Scores for mixed quality IP addresses. If you experience any false-positives with your traffic then enabling this feature will provide better results.
+|   **Possible values**: (true|false)
+|   **Default**: true
+
+| **transaction_strictness**
+|   **Syntax**: transaction_strictness=<int>
+|   **Description**: Adjusts the weights for penalties applied due to irregularities and fraudulent patterns detected on order and transaction details that can be optionally provided on each API request. This feature is only beneficial if you are passing order and transaction details. A table is available further down the page with supported transaction variables.
+|   **Possible values**: 0-2
+|   **Default**: 0
+
+Example Usage
+-------------
+
+|   ... | ipdetection field="email_address"
+
+|   ... | ipdetection field="email_address" strictness=2 fast=true

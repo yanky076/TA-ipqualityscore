@@ -22,7 +22,7 @@ class ProxyVPNDetectionWrapper(object):
         self.logger.info('URL: '+url+", Time taken: "+str(end_time - start_time)+' sec')
         return resp
 
-    def ip_detection_multithreaded(self, ips, strictness=0, allow_public_access_points="true", fast="true", lighter_penalties="true", mobile="true"):
+    def ip_detection_multithreaded(self, ips, strictness=0, allow_public_access_points="true", fast="true", lighter_penalties="true", mobile="false"):
         urls = []
         start_time = time.time()
         for ip in ips:

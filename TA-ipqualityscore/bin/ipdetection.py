@@ -51,6 +51,8 @@ def get_credentials(sessionKey):
 @Configuration(distributed=True, local=False)
 class IPDetectionCommand(StreamingCommand):
 
+    field = Option(
+        require=True, default=True, validate=validators.Fieldname())
     allow_public_access_points = Option(
         require=False, default=True, validate=validators.Boolean())
     mobile = Option(require=False, default=True, validate=validators.Boolean())
@@ -65,8 +67,9 @@ class IPDetectionCommand(StreamingCommand):
 
         correct_records = []
         incorrect_records = []
+
         for record in records:
-            if 'ip' in record:
+            if self.field in record:
                 correct_records.append(record)
             else:
                 incorrect_records.append(record)
@@ -86,7 +89,7 @@ class IPDetectionCommand(StreamingCommand):
                 ips = []
                 rs = []
                 for record in correct_records:
-                    ips.append(record.get('ip'))
+                    ips.append(record.get(self.field))
                     rs.append(record)
                     
                 results_dict = ipqualityscoreclient.ip_detection_multithreaded(ips,
@@ -96,7 +99,7 @@ class IPDetectionCommand(StreamingCommand):
                                                                                 strictness=self.strictness,
                                                                                 lighter_penalties=self.lighter_penalties)
                 for record in rs:
-                    detection_result = results_dict.get(record['ip'])
+                    detection_result = results_dict.get(record[self.field])
                     
                     if detection_result is not None:
                         for key, val in detection_result.items():

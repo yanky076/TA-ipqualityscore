@@ -51,6 +51,8 @@ def get_credentials(sessionKey):
 @Configuration()
 class URLCheckerCommand(StreamingCommand):
 
+    field = Option(
+        require=True, default=True, validate=validators.Fieldname())
     strictness = Option(require=False, default=0,
                         validate=validators.Integer())
 
@@ -60,7 +62,7 @@ class URLCheckerCommand(StreamingCommand):
         correct_records = []
         incorrect_records = []
         for record in records:
-            if 'url' in record:
+            if self.field in record:
                 correct_records.append(record)
             else:
                 incorrect_records.append(record)
@@ -80,13 +82,13 @@ class URLCheckerCommand(StreamingCommand):
                 links = []
                 rs = []
                 for record in correct_records:
-                    links.append(record.get('url'))
+                    links.append(record.get(self.field))
                     rs.append(record)
                     
                 results_dict = ipqualityscoreclient.url_checker_multithreaded(links, strictness=self.strictness)
 
                 for record in rs:
-                    detection_result = results_dict.get(record['url'])
+                    detection_result = results_dict.get(record[self.field])
                     
                     if detection_result is not None:
                         for key, val in detection_result.items():
