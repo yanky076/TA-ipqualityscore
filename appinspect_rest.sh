@@ -21,7 +21,7 @@ case "$appinspect_token" in
     ;;
 esac
 
-for app in $(ls *.tgz); do
+for app in $(ls dist/*.tgz); do
 
     echo -n "RUN: Please confirm submitting the app ${app} to appinspect API vetting (yes / no) ?  "; read submit
     case ${submit} in
@@ -72,7 +72,7 @@ for app in $(ls *.tgz); do
                 case ${download} in
                 y|yes|Yes)
                     datetime=$(date '+%m%d%Y_%H%M%S')
-                    filename="appinspect_report_${datetime}.html"
+                    filename="dist/appinspect_report_${datetime}.html"
                     curl -X GET \
                         -s \
                         -H "Authorization: bearer ${appinspect_token}" \

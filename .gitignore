@@ -40,7 +40,7 @@ backups
 appinspect_report*.html
 
 # build files
-*tgz
+dist/*
 
 # test files
 test/sample*.txt
