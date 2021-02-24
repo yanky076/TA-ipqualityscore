@@ -1,6 +1,11 @@
 Release notes
 #############
 
+Version 1.0.5
+=============
+
+- Updated setting for cloud vetting
+  
 Version 1.0.4
 =============
 
