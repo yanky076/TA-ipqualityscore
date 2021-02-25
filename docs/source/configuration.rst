@@ -18,4 +18,4 @@ This defines the identifier for the API key. It is required for Splunk internall
 
 - ** Password:**
 
-This defies the IPQualityScore API key. The key will be hidden from user view and will be encrypted before being stored in Splunk.
+This defines the IPQualityScore API key. The key will be hidden from user view and will be encrypted before being stored in Splunk.

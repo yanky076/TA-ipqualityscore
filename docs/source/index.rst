@@ -3,16 +3,18 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to TA-ipqualityscore's documentation!
-=============================================
+Welcome to IPQualityScore (IPQS) Threat Risk Scoring App for Splunk's documentation!
+====================================================================================
 
-** This addon provides custom commands for interacting with [IPQualityScore](https://www.ipqualityscore.com/) via the REST API. Supported endpoint includes:
+** This Splunk addon provides custom commands for interacting with [IPQualityScore](https://www.ipqualityscore.com/) via the REST API. Supported endpoint includes:
 
 - Proxy & VPN Detection API
 - Email Validation API
 - Malicious URL Scanner API
 
 More details on the API can be found at IPQualityScore [Documentation](https://www.ipqualityscore.com/documentation/overview) page
+
+View public announcement for Splunk Addon availabilty at [IPQS Integrations](https://www.ipqualityscore.com/plugins-integrations/splunk-threat-intelligence-feeds) page.
 
 Overview:
 =========
